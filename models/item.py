@@ -17,6 +17,7 @@ class LostItem(db.Model):
     occurred_at = db.Column(db.DateTime(timezone=True), nullable=False, default=_now_utc)
     reporter_name = db.Column(db.String(64), nullable=True)
     contact_info = db.Column(db.String(128), nullable=True)
+    image_path = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=_now_utc)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
@@ -42,6 +43,7 @@ class FoundItem(db.Model):
     occurred_at = db.Column(db.DateTime(timezone=True), nullable=False, default=_now_utc)
     reporter_name = db.Column(db.String(64), nullable=True)
     contact_info = db.Column(db.String(128), nullable=True)
+    image_path = db.Column(db.String(255), nullable=True)
     created_at = db.Column(db.DateTime(timezone=True), nullable=False, default=_now_utc)
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
 
