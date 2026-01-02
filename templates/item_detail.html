@@ -26,6 +26,17 @@
 					</div>
 				</div>
 
+				{% if item.image_path %}
+				<div class="row mb-4">
+					<div class="col-12">
+						<h6 class="text-muted">物品照片</h6>
+						<a href="{{ url_for('static', filename=item.image_path) }}" target="_blank" rel="noopener" class="d-inline-block">
+							<img src="{{ url_for('static', filename=item.image_path) }}" alt="物品照片" class="img-fluid rounded shadow-sm">
+						</a>
+					</div>
+				</div>
+				{% endif %}
+
 				<div class="row mb-4">
 					<div class="col-md-6">
 						<h6 class="text-muted">发生地点</h6>
