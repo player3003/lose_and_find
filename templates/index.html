@@ -134,18 +134,21 @@
 				{% if all_lost_items %}
 					{% for item in all_lost_items %}
 						<div class="list-group-item">
-							<div class="d-flex justify-content-between align-items-start">
-								<div class="me-3 flex-grow-1">
-									<a class="stretched-link text-body text-decoration-none" href="{{ url_for('view_lost_item', lost_id=item.id) }}">
+							<a class="stretched-link text-body text-decoration-none" href="{{ url_for('view_lost_item', lost_id=item.id) }}">
+								<div class="d-flex align-items-start gap-3">
+									{% if item.image_path %}
+									<img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.category }} 照片" class="rounded shadow-sm" style="width:64px;height:64px;object-fit:cover;">
+									{% endif %}
+									<div class="flex-grow-1">
 										<div class="d-flex w-100 justify-content-between mb-1">
 											<h6 class="mb-0">{{ item.category }}</h6>
 											<small class="text-muted">{{ item.occurred_at.strftime('%Y-%m-%d %H:%M') }}</small>
 										</div>
 										<p class="mb-1 text-muted small">{{ item.description[:35] }}{% if item.description|length > 35 %}...{% endif %}</p>
 										<p class="mb-0 text-muted small">📍 {{ item.location }} | 报告者: {{ item.reporter_name or item.owner.username }}</p>
-									</a>
+									</div>
 								</div>
-							</div>
+							</a>
 						</div>
 					{% endfor %}
 				{% else %}
@@ -166,18 +169,21 @@
 				{% if all_found_items %}
 					{% for item in all_found_items %}
 						<div class="list-group-item">
-							<div class="d-flex justify-content-between align-items-start">
-								<div class="me-3 flex-grow-1">
-									<a class="stretched-link text-body text-decoration-none" href="{{ url_for('view_found_item', found_id=item.id) }}">
+							<a class="stretched-link text-body text-decoration-none" href="{{ url_for('view_found_item', found_id=item.id) }}">
+								<div class="d-flex align-items-start gap-3">
+									{% if item.image_path %}
+									<img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.category }} 照片" class="rounded shadow-sm" style="width:64px;height:64px;object-fit:cover;">
+									{% endif %}
+									<div class="flex-grow-1">
 										<div class="d-flex w-100 justify-content-between mb-1">
 											<h6 class="mb-0">{{ item.category }}</h6>
 											<small class="text-muted">{{ item.occurred_at.strftime('%Y-%m-%d %H:%M') }}</small>
 										</div>
 										<p class="mb-1 text-muted small">{{ item.description[:35] }}{% if item.description|length > 35 %}...{% endif %}</p>
 										<p class="mb-0 text-muted small">📍 {{ item.location }} | 报告者: {{ item.reporter_name or item.owner.username }}</p>
-									</a>
+									</div>
 								</div>
-							</div>
+							</a>
 						</div>
 					{% endfor %}
 				{% else %}
@@ -221,17 +227,33 @@
 									{{ match.level }}
 								</span>
 							</td>
-							<td>
-								<a href="{{ url_for('view_lost_item', lost_id=match.lost_item.id) }}" class="text-decoration-none">
-									<strong>{{ match.lost_item.category }}</strong><br>
-									<small class="text-muted">{{ match.lost_item.description[:30] }}{% if match.lost_item.description|length > 30 %}...{% endif %}</small>
-								</a>
+							<td class="align-middle">
+								<div class="d-flex align-items-start gap-3">
+									{% if match.lost_item.image_path %}
+									<img src="{{ url_for('static', filename=match.lost_item.image_path) }}" alt="{{ match.lost_item.category }} 照片" class="rounded shadow-sm" style="width:56px;height:56px;object-fit:cover;">
+									{% endif %}
+									<div>
+										<div class="fw-semibold mb-1">{{ match.lost_item.category }}</div>
+										<div class="text-muted small">{{ match.lost_item.description[:30] }}{% if match.lost_item.description|length > 30 %}...{% endif %}</div>
+										<div class="mt-2">
+											<a class="btn btn-sm btn-outline-secondary" href="{{ url_for('view_lost_item', lost_id=match.lost_item.id) }}">查看失物</a>
+										</div>
+									</div>
+								</div>
 							</td>
-							<td>
-								<a href="{{ url_for('view_found_item', found_id=match.found_item.id) }}" class="text-decoration-none">
-									<strong>{{ match.found_item.category }}</strong><br>
-									<small class="text-muted">{{ match.found_item.description[:30] }}{% if match.found_item.description|length > 30 %}...{% endif %}</small>
-								</a>
+							<td class="align-middle">
+								<div class="d-flex align-items-start gap-3">
+									{% if match.found_item.image_path %}
+									<img src="{{ url_for('static', filename=match.found_item.image_path) }}" alt="{{ match.found_item.category }} 照片" class="rounded shadow-sm" style="width:56px;height:56px;object-fit:cover;">
+									{% endif %}
+									<div>
+										<div class="fw-semibold mb-1">{{ match.found_item.category }}</div>
+										<div class="text-muted small">{{ match.found_item.description[:30] }}{% if match.found_item.description|length > 30 %}...{% endif %}</div>
+										<div class="mt-2">
+											<a class="btn btn-sm btn-outline-secondary" href="{{ url_for('view_found_item', found_id=match.found_item.id) }}">查看招领</a>
+										</div>
+									</div>
+								</div>
 							</td>
 							<td><strong>{{ match.score }}</strong></td>
 							<td>{{ match.reason or "-" }}</td>
