@@ -42,12 +42,19 @@
 							<div class="d-flex justify-content-between align-items-start">
 								<div class="me-3 flex-grow-1">
 									<a class="stretched-link text-body text-decoration-none" href="{{ url_for('view_lost_item', lost_id=item.id) }}">
-										<div class="d-flex w-100 justify-content-between mb-1">
-											<h6 class="mb-0">{{ item.category }}</h6>
-											<small class="text-muted">{{ item.occurred_at.strftime('%Y-%m-%d') }}</small>
+										<div class="d-flex align-items-start gap-3">
+											{% if item.image_path %}
+											<img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.category }} 照片" class="rounded shadow-sm" style="width:64px;height:64px;object-fit:cover;">
+											{% endif %}
+											<div class="flex-grow-1">
+												<div class="d-flex w-100 justify-content-between mb-1">
+													<h6 class="mb-0">{{ item.category }}</h6>
+													<small class="text-muted">{{ item.occurred_at.strftime('%Y-%m-%d') }}</small>
+												</div>
+												<p class="mb-1 text-muted small">{{ item.description[:30] }}{% if item.description|length > 30 %}...{% endif %}</p>
+												<p class="mb-0 text-muted small">📍 {{ item.location }}</p>
+											</div>
 										</div>
-										<p class="mb-1 text-muted small">{{ item.description[:30] }}{% if item.description|length > 30 %}...{% endif %}</p>
-										<p class="mb-0 text-muted small">📍 {{ item.location }}</p>
 									</a>
 								</div>
 								<form method="post" action="{{ url_for('delete_lost_item', lost_id=item.id) }}" onsubmit="return confirm('确认删除？');" style="display: inline;">
@@ -77,12 +84,19 @@
 							<div class="d-flex justify-content-between align-items-start">
 								<div class="me-3 flex-grow-1">
 									<a class="stretched-link text-body text-decoration-none" href="{{ url_for('view_found_item', found_id=item.id) }}">
-										<div class="d-flex w-100 justify-content-between mb-1">
-											<h6 class="mb-0">{{ item.category }}</h6>
-											<small class="text-muted">{{ item.occurred_at.strftime('%Y-%m-%d') }}</small>
+										<div class="d-flex align-items-start gap-3">
+											{% if item.image_path %}
+											<img src="{{ url_for('static', filename=item.image_path) }}" alt="{{ item.category }} 照片" class="rounded shadow-sm" style="width:64px;height:64px;object-fit:cover;">
+											{% endif %}
+											<div class="flex-grow-1">
+												<div class="d-flex w-100 justify-content-between mb-1">
+													<h6 class="mb-0">{{ item.category }}</h6>
+													<small class="text-muted">{{ item.occurred_at.strftime('%Y-%m-%d') }}</small>
+												</div>
+												<p class="mb-1 text-muted small">{{ item.description[:30] }}{% if item.description|length > 30 %}...{% endif %}</p>
+												<p class="mb-0 text-muted small">📍 {{ item.location }}</p>
+											</div>
 										</div>
-										<p class="mb-1 text-muted small">{{ item.description[:30] }}{% if item.description|length > 30 %}...{% endif %}</p>
-										<p class="mb-0 text-muted small">📍 {{ item.location }}</p>
 									</a>
 								</div>
 								<form method="post" action="{{ url_for('delete_found_item', found_id=item.id) }}" onsubmit="return confirm('确认删除？');" style="display: inline;">
