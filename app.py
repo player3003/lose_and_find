@@ -101,9 +101,12 @@ def index():
     )
 
 
-@app.post("/lost")
+@app.route("/lost/new", methods=["GET", "POST"])
 @login_required
 def create_lost_item():
+    if request.method == "GET":
+        return render_template("lost_form.html", categories=ITEM_CATEGORIES)
+
     category = request.form.get("category", "").strip()
     description = request.form.get("description", "").strip()
     location = request.form.get("location", "").strip()
@@ -135,9 +138,12 @@ def create_lost_item():
     return redirect(url_for("index", lost_id=lost_item.id))
 
 
-@app.post("/found")
+@app.route("/found/new", methods=["GET", "POST"])
 @login_required
 def create_found_item():
+    if request.method == "GET":
+        return render_template("found_form.html", categories=ITEM_CATEGORIES)
+
     category = request.form.get("category", "").strip()
     description = request.form.get("description", "").strip()
     location = request.form.get("location", "").strip()
@@ -172,12 +178,12 @@ def create_found_item():
 @app.post("/lost/<int:lost_id>/delete")
 @login_required
 def delete_lost_item(lost_id: int):
+    if not current_user.is_admin:
+        abort(403)
     item = db.session.get(LostItem, lost_id)
     if item is None:
         flash("失物信息不存在。", "warning")
         return redirect(url_for("index"))
-    if item.user_id != current_user.id:
-        abort(403)
     match_service.delete_lost_item(lost_id)
     flash("失物信息已删除。", "info")
     return redirect(url_for("index"))
@@ -186,12 +192,12 @@ def delete_lost_item(lost_id: int):
 @app.post("/found/<int:found_id>/delete")
 @login_required
 def delete_found_item(found_id: int):
+    if not current_user.is_admin:
+        abort(403)
     item = db.session.get(FoundItem, found_id)
     if item is None:
         flash("招领信息不存在。", "warning")
         return redirect(url_for("index"))
-    if item.user_id != current_user.id:
-        abort(403)
     match_service.delete_found_item(found_id)
     flash("招领信息已删除。", "info")
     return redirect(url_for("index"))
