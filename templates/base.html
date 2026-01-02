@@ -9,7 +9,29 @@
 <body class="bg-light">
 <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4">
     <div class="container">
-        <span class="navbar-brand">校园失物招领智能推荐系统</span>
+        <a class="navbar-brand" href="{{ url_for('index') }}">校园失物招领智能推荐系统</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav" aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-lg-center gap-lg-2">
+                {% if current_user.is_authenticated %}
+                    <li class="nav-item text-white-50 small">欢迎，{{ current_user.username }}</li>
+                    <li class="nav-item">
+                        <form method="post" action="{{ url_for('logout') }}">
+                            <button class="btn btn-outline-light btn-sm" type="submit">退出登录</button>
+                        </form>
+                    </li>
+                {% else %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('login') }}">登录</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('register') }}">注册</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </div>
     </div>
 </nav>
 <main class="container mb-5">
