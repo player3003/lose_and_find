@@ -2,10 +2,13 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Optional
 
+import click
 from flask import Flask, abort, redirect, render_template, request, url_for
 from flask import flash
+from flask.cli import with_appcontext
 from flask_login import (LoginManager, current_user, login_required,
                          login_user, logout_user)
+from sqlalchemy import func
 
 from agent.rule_agent import RuleBasedAgent
 from config import Config
@@ -75,30 +78,98 @@ def _parse_datetime(value: Optional[str]) -> datetime:
 
 @app.get("/")
 def index():
-    highlight_lost_id = request.args.get("lost_id", type=int)
-    highlight_found_id = request.args.get("found_id", type=int)
-    highlight_match_id = request.args.get("match_id", type=int)
-
-    lost_items = match_service.all_lost_items()
-    found_items = match_service.all_found_items()
-
-    if highlight_lost_id:
-        matches = match_service.matches_for_lost(highlight_lost_id)
-    elif highlight_found_id:
-        matches = match_service.matches_for_found(highlight_found_id)
+    # Get all items for display (everyone sees the full list)
+    all_lost_items = match_service.all_lost_items()
+    all_found_items = match_service.all_found_items()
+    
+    # Get user's own items if authenticated
+    my_lost_items = []
+    my_found_items = []
+    if current_user.is_authenticated:
+        my_lost_items = match_service.all_lost_items(current_user.id, include_all=False)
+        my_found_items = match_service.all_found_items(current_user.id, include_all=False)
+    
+    # Determine which matches to show (user's matches or recent)
+    if current_user.is_authenticated:
+        matches = match_service.matches_for_user(current_user.id)
     else:
         matches = match_service.recent_matches()
 
     return render_template(
         "index.html",
         categories=ITEM_CATEGORIES,
-        lost_items=lost_items,
-        found_items=found_items,
+        all_lost_items=all_lost_items,
+        all_found_items=all_found_items,
+        my_lost_items=my_lost_items,
+        my_found_items=my_found_items,
         matches=matches,
-        highlight_lost_id=highlight_lost_id,
-        highlight_found_id=highlight_found_id,
-        highlight_match_id=highlight_match_id,
     )
+
+
+@app.get("/lost/<int:lost_id>")
+def view_lost_item(lost_id: int):
+    item = db.session.get(LostItem, lost_id)
+    if item is None:
+        flash("失物信息不存在。", "warning")
+        return redirect(url_for("index"))
+    
+    is_owner = current_user.is_authenticated and item.user_id == current_user.id
+    item_matches = match_service.matches_for_lost(lost_id) if is_owner else []
+    
+    return render_template(
+        "item_detail.html",
+        item=item,
+        item_type="lost",
+        is_owner=is_owner,
+        item_matches=item_matches,
+    )
+
+
+@app.get("/found/<int:found_id>")
+def view_found_item(found_id: int):
+    item = db.session.get(FoundItem, found_id)
+    if item is None:
+        flash("招领信息不存在。", "warning")
+        return redirect(url_for("index"))
+    
+    is_owner = current_user.is_authenticated and item.user_id == current_user.id
+    item_matches = match_service.matches_for_found(found_id) if is_owner else []
+    
+    return render_template(
+        "item_detail.html",
+        item=item,
+        item_type="found",
+        is_owner=is_owner,
+        item_matches=item_matches,
+    )
+
+
+@app.post("/lost/<int:lost_id>/match")
+@login_required
+def trigger_lost_match(lost_id: int):
+    if not match_service.owns_lost_item(lost_id, current_user.id):
+        abort(403)
+    item = db.session.get(LostItem, lost_id)
+    if item is None:
+        flash("失物信息不存在。", "warning")
+        return redirect(url_for("index"))
+    agent.handle_new_lost(item)
+    flash("智能体已触发匹配，结果已更新。", "success")
+    return redirect(url_for("view_lost_item", lost_id=lost_id))
+
+
+@app.post("/found/<int:found_id>/match")
+@login_required
+def trigger_found_match(found_id: int):
+    if not match_service.owns_found_item(found_id, current_user.id):
+        abort(403)
+    item = db.session.get(FoundItem, found_id)
+    if item is None:
+        flash("招领信息不存在。", "warning")
+        return redirect(url_for("index"))
+    agent.handle_new_found(item)
+    flash("智能体已触发匹配，结果已更新。", "success")
+    return redirect(url_for("view_found_item", found_id=found_id))
 
 
 @app.route("/lost/new", methods=["GET", "POST"])
@@ -240,6 +311,10 @@ def register():
 
         user = User(username=username)
         user.set_password(password)
+        # First registered account becomes administrator for later management tasks.
+        existing_users = db.session.scalar(db.select(func.count()).select_from(User))
+        if existing_users == 0:
+            user.is_admin = True
         db.session.add(user)
         db.session.commit()
 
@@ -278,6 +353,22 @@ def logout():
     logout_user()
     flash("您已退出登录。", "info")
     return redirect(url_for("login"))
+
+
+@app.cli.command("promote-admin")
+@click.argument("username")
+@with_appcontext
+def promote_admin(username: str) -> None:
+    user: Optional[User] = db.session.scalar(db.select(User).filter_by(username=username))
+    if user is None:
+        click.echo(f"未找到用户：{username}", err=True)
+        raise SystemExit(1)
+    if user.is_admin:
+        click.echo(f"用户 {username} 已是管理员。")
+        return
+    user.is_admin = True
+    db.session.commit()
+    click.echo(f"用户 {username} 已被设为管理员。")
 
 
 if __name__ == "__main__":
