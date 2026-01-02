@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0">用户登录</h5>
+            </div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('login') }}">
+                    <div class="mb-3">
+                        <label class="form-label">用户名</label>
+                        <input class="form-control" name="username" value="{{ username|default('') }}" autocomplete="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">密码</label>
+                        <input class="form-control" type="password" name="password" autocomplete="current-password" required>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <button class="btn btn-primary" type="submit">登录</button>
+                        <a class="small" href="{{ url_for('register') }}">没有账号？立即注册</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
