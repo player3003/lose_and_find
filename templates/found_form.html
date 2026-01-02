@@ -9,7 +9,7 @@
                 <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('index') }}">返回首页</a>
             </div>
             <div class="card-body">
-                <form method="post" action="{{ url_for('create_found_item') }}">
+                <form method="post" action="{{ url_for('create_found_item') }}" enctype="multipart/form-data">
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label">物品类别</label>
@@ -30,7 +30,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label">拾到人（选填）</label>
-                            <input class="form-control" name="finder_name">
+                            <input class="form-control" name="reporter_name">
                         </div>
                         <div class="col-12">
                             <label class="form-label">详细描述</label>
@@ -39,6 +39,11 @@
                         <div class="col-12">
                             <label class="form-label">联系方式（选填）</label>
                             <input class="form-control" name="contact_info" placeholder="电话/邮箱/微信">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label">物品照片（选填）</label>
+                            <input class="form-control" type="file" name="image" accept="image/*">
+                            <div class="form-text">支持 PNG / JPG / GIF / WebP，大小不超过 5MB。</div>
                         </div>
                     </div>
                     <div class="d-flex justify-content-end gap-2 mt-4">
